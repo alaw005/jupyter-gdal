@@ -8,7 +8,7 @@ USER root
 # Install software properties to allow add-apt-repository
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
-    software-properties-common
+    software-properties-common 
     
 # Install OS dependencies for gdal
 RUN add-apt-repository ppa:ubuntugis/ppa && \
@@ -18,13 +18,14 @@ RUN add-apt-repository ppa:ubuntugis/ppa && \
     libgdal-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Python gdal 
-RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
-    export C_INCLUDE_PATH=/usr/include/gdal && \
-    pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}')
-
-# Install other Python packages
-RUN pip install --upgrade jupyterlab jupyterlab-git
-
 # Switch back to jovyan user
 USER ${NB_UID}
+
+# Install Python 3 gdal pacakges
+RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
+    export C_INCLUDE_PATH=/usr/include/gdal
+RUN pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}')
+
+# Install Python 3 other packages
+RUN pip install --upgrade jupyterlab jupyterlab-git
+
