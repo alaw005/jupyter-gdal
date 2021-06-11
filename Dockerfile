@@ -1,13 +1,25 @@
-FROM jupyter/minimal-notebook
+ARG BASE_CONTAINER=jupyter/minimal-notebook
+FROM $BASE_CONTAINER
+
+LABEL maintainer="alaw005 <alaw005@gmail.com>"
 
 USER root
 
-RUN apt-get update && apt-get install software-properties-common -y
-RUN add-apt-repository ppa:ubuntugis/ppa && apt-get update
-RUN apt-get install gdal-bin -y && apt-get install libgdal-dev -y
-RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && export C_INCLUDE_PATH=/usr/include/gdal
+# Install all OS dependencies for gdal
+RUN add-apt-repository ppa:ubuntugis/ppa && \
+    apt-get update --yes && \
+    apt-get install --yes --no-install-recommends \
+    software-properties-common \
+    gdal-bin \
+    libgdal-dev
 
-USER $NB_USER
+# Install Python gdal 
+RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
+    export C_INCLUDE_PATH=/usr/include/gdal && \
+    pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}')
 
-RUN pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}') && \
-    pip install --upgrade jupyterlab jupyterlab-git
+# Install other Python packages
+RUN pip install --upgrade jupyterlab jupyterlab-git
+
+# Switch back to jovyan user
+USER ${NB_UID}
