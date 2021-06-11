@@ -1,9 +1,13 @@
 FROM jupyter/minimal-notebook
 
-# Add RUN statements to install packages as the $NB_USER defined in the base images.
+USER root
 
-# Add a "USER root" statement followed by RUN statements to install system packages using apt-get,
-# change file permissions, etc.
+RUN apt-get update && apt-get install software-properties-common -y
+RUN add-apt-repository ppa:ubuntugis/ppa && apt-get update
+RUN apt-get install gdal-bin -y && apt-get install libgdal-dev -y
+RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && export C_INCLUDE_PATH=/usr/include/gdal
 
-# If you do switch to root, always be sure to add a "USER $NB_USER" command at the end of the
-# file to ensure the image runs as a unprivileged user by default.
+USER $NB_USER
+
+RUN pip install GDAL==$(gdal-config --version | awk -F'[.]' '{print $1"."$2}') && \
+    pip install --upgrade jupyterlab jupyterlab-git
