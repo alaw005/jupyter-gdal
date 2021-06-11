@@ -5,13 +5,18 @@ LABEL maintainer="alaw005 <alaw005@gmail.com>"
 
 USER root
 
-# Install all OS dependencies for gdal
+# Install software properties to allow add-apt-repository
+RUN apt-get update --yes && \
+    apt-get install --yes --no-install-recommends \
+    software-properties-common
+    
+# Install OS dependencies for gdal
 RUN add-apt-repository ppa:ubuntugis/ppa && \
     apt-get update --yes && \
     apt-get install --yes --no-install-recommends \
-    software-properties-common \
     gdal-bin \
-    libgdal-dev
+    libgdal-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Python gdal 
 RUN export CPLUS_INCLUDE_PATH=/usr/include/gdal && \
